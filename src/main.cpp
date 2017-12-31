@@ -117,6 +117,7 @@ void setup() {
 
     #ifdef OFFLINE_MODE
         Serial.println("-- init data logger");
+        delay(1000);
         if (dataLogger.init()) 
         {
             u8x8.println("sdcard - ok");
@@ -135,7 +136,7 @@ void setup() {
             return;
         }
     #endif
-
+    
     #ifndef OFFLINE_MODE
         // LMIC init
         os_init();

@@ -11,9 +11,13 @@ DataLogger::DataLogger(const char * filePath)
 
 bool DataLogger::init() 
 {
-    if(!SD.begin()){
-        Serial.println("Card Mount Failed");
-        return false;
+    int retries = 0;
+    while(!SD.begin()) {
+        if (retries > 10) {
+            Serial.println("Card Mount Failed");
+            return false;
+        }
+        retries++;
     }
     uint8_t cardType = SD.cardType();
 
