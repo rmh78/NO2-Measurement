@@ -48,3 +48,7 @@ The power consumption is high (TODO) because the NO2 sensor has an integrated he
 - [ ] modify nodred flow to use linear function to calculate NO2
 - [ ] display worldmap on the nodered dashboard
 - [ ] add images to the readme page
+
+# Conflicts
+* LMIC does not work in with RTOS (https://www.freertos.org) Tasks because of timing issues. There is no current version of the LMIC library for the ESP32. Because of this issue I decided to do not use tasks for measurement and sending.
+* LMIC does not work in combination with the SD card reader. I think it's because they are both on the SPI bus. Because of this issue the SD card is only used in the offline mode (used for calibration only).

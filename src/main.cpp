@@ -76,6 +76,7 @@ static bool toggleOn = false;
  */
 DataLogger dataLogger = DataLogger("/no2-data.csv");
 
+/* Prototypes */
 void sendStart(osjob_t* j);
 void measureAndSend(osjob_t* j);
 void measure();
@@ -160,13 +161,15 @@ void measureAndSend(osjob_t* j)
 
     #ifdef TOGGLE_MODE
         if (toggleOn) {
+            // only send data if toggle button is on
             send();
             if (uxQueueMessagesWaiting(xQueue) == 0) 
             {
-                // switch to measure mode
+                // switch to measure mode if no more messages to send
                 setToggleButton(false);
             }
         } else {
+            // only measure if toggle button is off
             measure();
             os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(1), measureAndSend);
         }
@@ -208,7 +211,9 @@ void measure()
     }
     else 
     {
-        readToggleButton();
+        #ifdef TOGGLE_MODE
+            readToggleButton();
+        #endif
 
         int remainingSeconds = (measurementWaitPeriod - elapsedTime) / 1000;
         u8x8.setCursor(0, 7);

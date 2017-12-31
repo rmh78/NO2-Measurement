@@ -7,6 +7,9 @@
 extern "C"{
 #endif
 
+/* 
+ * This class holds all measurement data of one measurement iteration
+ */
 class EnvironmentData
 {
 public:
@@ -35,6 +38,9 @@ public:
     void sdcard_message(char* outStr);
 };
 
+/* 
+ * This class holds the zero values and sensitivity of a alphasense NO2 sensor (the values are shipped with the sensor) 
+ */
 class NO2Sensor
 {
 public:
@@ -47,6 +53,9 @@ public:
     NO2Sensor(uint32_t _serial_no, uint8_t _we_zero_electronic, uint8_t _we_zero_total, uint8_t _ae_zero_electronic, uint8_t _ae_zero_total, float _sensitivity);
 };
 
+/* 
+ * This class is responsible for the measurement of temperature, humidity, pressure, NO2 and GPS
+ */
 class NO2Measurement
 {
 public:

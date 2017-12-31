@@ -5,6 +5,9 @@
 extern "C"{
 #endif
 
+/* 
+ * This class is responsible for handling the access to one file on the SD card
+ */
 class DataLogger
 {
 private:
