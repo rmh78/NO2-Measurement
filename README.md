@@ -11,11 +11,12 @@ The NO2 measurement station uses two NO2 sensors, a temperature and humidity sen
 * 1x air-pressure sensor BMP180 from Adafruit
 * 1x GPS module from Adafruit
 * 1x SD card reader from AZDelivery
-* 1x 5V step-up-converter
+* 1x 5V step-up-converter (Pololu reg09b) to power the NO2 sensor
 * 1x Powerbank with 20.000 mAh
 * 1x weatherproofed casing
 
-![Image of NO2 measurement station](images/no2-measurement-1.jpg)
+![Image of NO2 measurement station - breadboard](images/no2-measurement-1.jpg)
+![Image of NO2 measurement station - testrun](images/no2-measurement-2.jpg)
 
 # Software-Stack
 * Visual Studio Code with PlatformIO (https://code.visualstudio.com and http://platformio.org)
