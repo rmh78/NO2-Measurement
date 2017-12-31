@@ -41,11 +41,14 @@ const lmic_pinmap lmic_pins = {
 };
 static osjob_t sendjob;
 
-// queue variables
+/* Queue to store the measurement data
+ */
 QueueHandle_t xQueue;
 const TickType_t xTicksToWait = pdMS_TO_TICKS(100);
 
-// measurement variables
+/* Measurement variables
+ * The wait periods for measurement and sending are defined here
+ */
 NO2Measurement no2;
 EnvironmentData currentData;
 int measurementWaitPeriod = 10 * 60 * 1000;
@@ -53,10 +56,14 @@ int sendingWaitPeriod = 15 * 1000;
 unsigned long lastMeasurement = millis() - measurementWaitPeriod;
 unsigned long lastSending = millis() - sendingWaitPeriod;
 
-// OLED
+/* OLED
+ * Used to display the measurement and processing data 
+ */
 U8X8_SSD1306_128X64_NONAME_SW_I2C u8x8(/* clock=*/ 15, /* data=*/ 4, /* reset=*/ 16);
 
-// Toggle Button
+/* Toggle button
+ * Used only in TOGGLE_MODE to switch from measurement to sending mode
+ */
 const int buttonPin = 0;     // the number of the pushbutton pin
 const int ledPin =  25;      // the number of the LED pin
 static void readToggleButton();
@@ -64,7 +71,9 @@ static void setToggleButton(bool value);
 static int oldButtonState = HIGH;
 static bool toggleOn = false;
 
-// data logger
+/* Data logger
+ * Used to store the measurement data into a csv on the micro SD card
+ */
 DataLogger dataLogger = DataLogger("/no2-data.csv");
 
 void sendStart(osjob_t* j);
@@ -130,11 +139,6 @@ void setup() {
         // LMIC init
         os_init();
         LMIC_reset();
-
-        // Enable this to increase the receive window size, to compensate
-        // for an inaccurate clock.  // This compensate for +/- 10% clock
-        // error, a lower value will likely be more appropriate.
-        //LMIC_setClockError(MAX_CLOCK_ERROR * 10 / 100);
     #endif
 
     delay(5000);
