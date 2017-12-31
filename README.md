@@ -3,6 +3,8 @@ In this project I built a NO2 measurement station which sends its data via LoRaW
 
 The NO2 measurement station uses two NO2 sensors, a temperature and humidity sensor, an air-pressure sensor and a GPS module. The sensors are connected with the ESP32 microcontroller which has an OLED display and a LoRa module onboard. All the hardware is powered with a powerbank.
 
+![Image of NO2 measurement station](images/no2-measurement-1.jpg)
+
 # Hardware
 * 1x Heltec ESP32 with LoRa and OLED (http://www.heltec.cn)
 * 2x NO2 sensors from Alphasense (http://www.alphasense.com/index.php/products/nitrogen-dioxide-2)
