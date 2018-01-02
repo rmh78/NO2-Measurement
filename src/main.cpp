@@ -136,7 +136,7 @@ void setup() {
             return;
         }
     #endif
-    
+
     #ifndef OFFLINE_MODE
         // LMIC init
         os_init();
@@ -240,7 +240,8 @@ void send()
             currentData.sdcard_message(message);
             u8x8.clearLine(7);
             u8x8.setCursor(0, 7);
-            if (dataLogger.appendFile(message)) 
+            bool success = dataLogger.appendFile(message);
+            if (success) 
             {
                 u8x8.printf("append - ok");
             }
@@ -249,7 +250,7 @@ void send()
                 u8x8.printf("append - err");
             }
             delay(2000);
-            messageSent(true);
+            messageSent(success);
         #endif
 
         #ifndef OFFLINE_MODE
