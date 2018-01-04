@@ -2,5 +2,10 @@
     "terminal.integrated.env.osx": {
         "PATH": "/Users/rmh78/.platformio/penv/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/X11/bin"
     },
-    "platformio-ide.forceUploadAndMonitor":true
+    "platformio-ide.forceUploadAndMonitor": true,
+    "files.associations": {
+        "array": "cpp",
+        "initializer_list": "cpp",
+        "utility": "cpp"
+    }
 }

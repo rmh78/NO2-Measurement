@@ -10,7 +10,6 @@ The NO2 measurement station uses two NO2 sensors, a temperature and humidity sen
 * 1x temperature and humidity sensor SHT31 from Adafruit
 * 1x air-pressure sensor BMP180 from Adafruit
 * 1x GPS module from Adafruit
-* 1x SD card reader from AZDelivery (I do not recomment this breakout board - see issues at the bottom of the page)
 * 1x 5V step-up-converter (Pololu reg09b) to power the NO2 sensor
 * 1x Powerbank with 20.000 mAh
 * 1x weatherproofed casing
@@ -38,7 +37,7 @@ The NO2 measurement station uses two NO2 sensors, a temperature and humidity sen
 ![Image of NO2 dashboard](images/no2-nodered-dashboard.png)
 
 # Calibration of the NO2 sensor
-The NO2 sensors are pre-calibrated and are shipped with a formular to calculate the NO2 concentration in ppb with the measured output voltages of the sensor. Because the results are poor I decided to calibrate the sensors against the measurement data of the official measurement station (http://inters.bayern.de/luebmw/csv/blfu_1404_NO2.csv) of my hometown. I placed my hardware on the roof of my car and placed my car next to the offical station. So I was able to store the measured data of 2 days on a micro SD card. With this data I used linear regression (calculate with LibreOffice LINEST function: https://help.libreoffice.org/Calc/Array_Functions#LINEST) to get a linear function which outputs the NO2 concentration in ug/m3 like the official station does. For the linear regression I used the output voltage of NO2 sensor, the temperture, the humidity and the pressure as input data to get the values of the official station.
+The NO2 sensors are pre-calibrated and are shipped with a formular to calculate the NO2 concentration in ppb with the measured output voltages of the sensor. Because the results are poor I decided to calibrate the sensors against the measurement data of the official measurement station (http://inters.bayern.de/luebmw/csv/blfu_1404_NO2.csv) of my hometown. I placed my hardware on the roof of my car and placed my car next to the offical station. So I was able to store the measured data of 2 days on the flash memory of the ESP32. With this data I used linear regression (calculate with LibreOffice LINEST function: https://help.libreoffice.org/Calc/Array_Functions#LINEST) to get a linear function which outputs the NO2 concentration in ug/m3 like the official station does. For the linear regression I used the output voltage of NO2 sensor, the temperture, the humidity and the pressure as input data to get the values of the official station.
 
 ![Image of NO2 calibration - sensor on the parking car](images/no2-calibration-1.jpg)
 ![Image of NO2 calibration - official station](images/no2-calibration-2.jpg)
@@ -52,10 +51,11 @@ The power consumption is high (==TODO==) because the NO2 sensor has an integrate
 - [ ] calibration run next to the official station "Landshuter Allee" --> 02.01.2018 14:00 - 
 - [ ] define linear function with multiple linear regression
 - [ ] modify nodred flow to use linear function to calculate NO2
-- [ ] display worldmap on the nodered dashboard
-- [ ] add images to the readme page
+- [ ] display worldmap on the nodered dashboard using geoJSON (https://github.com/dceejay/RedMap)
+- [x] add images to the readme page
+- [ ] try Grafana for charts (https://grafana.com/grafana)
 
 # Conflicts / Issues / Findings
 * LMIC does not work in with RTOS (https://www.freertos.org) Tasks because of timing issues. There is no current version of the LMIC library for the ESP32. Because of this issue I decided to do not use tasks for measurement and sending.
 * LMIC does not work in combination with the SD card reader. I think it's because they are both on the SPI bus. Because of this issue the SD card is only used in the offline mode (used for calibration only).
-* SD card reader does not work very stable. First it does not work with 3.3V as described in the spec. Second it needs exact 5V, so I had to add an additional step-up-converter to power it.
+* SD card reader does not work very stable. First it does not work with 3.3V as described in the spec. Second it needs exact 5V, so I had to add an additional step-up-converter to power it. My first calibration-run ended with no data on the sd-card. I decided to switch to the internal flash-memory of the ESP32 using SPIFFS (the interface is nearly the same).

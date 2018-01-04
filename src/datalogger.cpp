@@ -1,8 +1,7 @@
 #include "datalogger.h"
 
 #include "FS.h"
-#include "SD.h"
-#include "SPI.h"
+#include "SPIFFS.h"
 
 DataLogger::DataLogger(const char * filePath) 
 {
@@ -11,58 +10,35 @@ DataLogger::DataLogger(const char * filePath)
 
 bool DataLogger::init() 
 {
-    int retries = 0;
-    while(!SD.begin()) {
-        if (retries > 10) {
-            Serial.println("Card Mount Failed");
-            return false;
-        }
-        retries++;
-    }
-    uint8_t cardType = SD.cardType();
-
-    if(cardType == CARD_NONE){
-        Serial.println("No SD card attached");
+    if(!SPIFFS.begin()) 
+    {
+        Serial.println("(S) - SPIFFS Mount Failed");
         return false;
     }
-
-    Serial.print("SD Card Type: ");
-    if(cardType == CARD_MMC){
-        Serial.println("MMC");
-    } else if(cardType == CARD_SD){
-        Serial.println("SDSC");
-    } else if(cardType == CARD_SDHC){
-        Serial.println("SDHC");
-    } else {
-        Serial.println("UNKNOWN");
-    }
-
-    uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-    Serial.printf("SD Card Size: %lluMB\n", cardSize);
 
     return true;
 }
 
 bool DataLogger::existsFile() 
 {
-    return SD.exists(path);
+    return SPIFFS.exists(path);
 }
 
 bool DataLogger::appendFile(const char * message) 
 {
-    Serial.printf("Appending to file: %s\n", path);
+    Serial.printf("(S) - SPIFFS Appending to file: %s\n", path);
 
-    File file = SD.open(path, FILE_APPEND);
+    File file = SPIFFS.open(path, FILE_APPEND);
     if(!file){
-        Serial.println("Failed to open file for appending");
+        Serial.println("(S) - SPIFFS Failed to open file for appending");
         return false;
     }
     if(file.print(message)){
-        Serial.println("Message appended");
+        Serial.printf("(S) - SPIFFS Message appended (file-size: %d bytes)\n", file.size());
         file.close();
         return true;
     } else {
-        Serial.println("Append failed");
+        Serial.printf("(S) - SPIFFS Append failed (file-size: %d bytes)\n", file.size());
         file.close();
         return false;
     }
@@ -70,15 +46,15 @@ bool DataLogger::appendFile(const char * message)
 
 void DataLogger::readFile() 
 {
-    Serial.printf("Reading file: %s\n", path);
+    Serial.printf("(S) - SPIFFS Reading file: %s\n", path);
 
-    File file = SD.open(path);
+    File file = SPIFFS.open(path);
     if(!file){
-        Serial.println("Failed to open file for reading");
+        Serial.println("(S) - SPIFFS Failed to open file for reading");
         return;
     }
 
-    Serial.print("Read from file: ");
+    Serial.println("(S) - SPIFFS Read from file: ");
     while(file.available()){
         Serial.write(file.read());
     }
@@ -87,10 +63,15 @@ void DataLogger::readFile()
 
 void DataLogger::deleteFile()
 {
-    Serial.printf("Deleting file: %s\n", path);
-    if(SD.remove(path)){
-        Serial.println("File deleted");
+    Serial.printf("(S) - SPIFFS Deleting file: %s\n", path);
+    if(SPIFFS.remove(path)){
+        Serial.println("(S) - SPIFFS File deleted");
     } else {
-        Serial.println("Delete failed");
+        Serial.println("(S) - SPIFFS Delete failed");
     }
+}
+
+void DataLogger::printInfo() 
+{
+    Serial.printf("(S) - SPIFFS memory used/total bytes: %d/%d\n", SPIFFS.usedBytes(), SPIFFS.totalBytes());
 }

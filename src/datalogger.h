@@ -6,7 +6,7 @@ extern "C"{
 #endif
 
 /* 
- * This class is responsible for handling the access to one file on the SD card
+ * This class is responsible for handling the access to one file on the flash storage (SPIFFS)
  */
 class DataLogger
 {
@@ -19,6 +19,7 @@ public:
     bool appendFile(const char * message);
     void readFile();
     void deleteFile();
+    void printInfo();
 };
 
 #ifdef __cplusplus

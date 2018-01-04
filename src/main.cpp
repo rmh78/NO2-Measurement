@@ -1,3 +1,14 @@
+/*
+ * This program reads the measured data of all sensors needed for NO2 calculation.
+ * The data is sent with LoRaWAN to the TheThingsNetwork.
+ * 
+ * There are four distinct modes which can be enabled
+ * - "normal mode" (non of the defines are enabled) - first measurement then sending data
+ * - OFFLINE_WRITE_MODE - first measurement then logging data into csv-file on the flash memory
+ * - OFFLINE_READ_MODE - reading the csv-file and print to the serial monitor
+ * - TOGGLE_MODE - only measurement unless the button is pressed which causes sending all stored messages
+ */
+
 #include <Arduino.h>
 #include <lmic.h>
 #include <hal/hal.h>
@@ -16,10 +27,15 @@
  */
 //#define TOGGLE_MODE
 
-/* OFFLINE_MODE means that data is written to sd-card instead 
+/* OFFLINE_WRITE_MODE writes a file to the flash-memory instead 
  * of sending it via lorawan
  */
-#define OFFLINE_MODE
+#define OFFLINE_WRITE_MODE
+
+/* OFFLINE_READ_MODE read the content of the file on the flash-memory 
+ * and displays it on the serial monitor
+ */
+//#define OFFLINE_READ_MODE
 
 /* LMIC callback methods to get the ids. 
  * The APPEUI, DEVEUI and APPKEY are defined in the file lorawan-node.h
@@ -72,12 +88,18 @@ static int oldButtonState = HIGH;
 static bool toggleOn = false;
 
 /* Data logger
- * Used to store the measurement data into a csv on the micro SD card
+ * Used to store the measurement data into a csv on the onboard flash memory
  */
 DataLogger dataLogger = DataLogger("/no2-data.csv");
 
 /* Prototypes */
-void sendStart(osjob_t* j);
+void initOled();
+bool initDataLoggerWrite();
+void initDataLoggerRead();
+void initButton();
+void initLed();
+void initQueue();
+void initLmic();
 void measureAndSend(osjob_t* j);
 void measure();
 void send();
@@ -87,11 +109,55 @@ void displayData(EnvironmentData *data);
 void displayQueue();
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
     delay(1000);
-    Serial.println(F("Starting"));
+    Serial.println(F("(I) ================================"));
+    Serial.println(F("(I) - init started"));
 
-    Serial.println("-- init OLED");
+    initOled();
+
+    #ifdef OFFLINE_READ_MODE
+        initDataLoggerRead();
+        return; 
+    #endif
+
+    #ifdef OFFLINE_WRITE_MODE
+        if (!initDataLoggerWrite()) {
+            return;
+        }
+    #endif
+
+    no2.init();
+    u8x8.println("sensors - ok");
+
+    #ifdef TOGGLE_MODE
+        initButton();
+    #endif
+
+    initLed();
+    initQueue();
+
+    #ifndef OFFLINE_WRITE_MODE
+        initLmic();
+    #endif
+
+    // wait to have time to read the oled display
+    delay(5000);
+    u8x8.clear();
+
+    // start measurement/send cycle
+    os_setCallback(&sendjob, measureAndSend);
+}
+
+void loop() 
+{
+    // Let LMIC handle background tasks
+    os_runloop_once();
+}
+
+void initOled() 
+{
+    Serial.println("(I) - init OLED");
     pinMode(16,OUTPUT);
     digitalWrite(16, LOW);   // turn the LED on (HIGH is the voltage level)
     delay(100);              // wait for a second
@@ -102,57 +168,70 @@ void setup() {
     u8x8.setFont(u8x8_font_victoriamedium8_r);
     u8x8.clear();
     u8x8.println("oled - ok");
-
-    no2.init();
-    u8x8.println("sensors - ok");
-
-    Serial.println("-- init button and led");
-    pinMode(ledPin, OUTPUT);
-    pinMode(buttonPin, INPUT);
-    u8x8.println("button/led - ok");
-
-    Serial.println("-- init queue");
-    xQueue = xQueueCreate(1000, sizeof(EnvironmentData));
-    u8x8.println("queue - ok");
-
-    #ifdef OFFLINE_MODE
-        Serial.println("-- init data logger");
-        delay(1000);
-        if (dataLogger.init()) 
-        {
-            u8x8.println("sdcard - ok");
-            // comment out in production
-            //dataLogger.deleteFile();
-
-            if (!dataLogger.existsFile()) 
-            {
-                Serial.println("-- write csv-header");
-                dataLogger.appendFile("date,time,latitude,longitude,temperature,humidity,pressure,ae0,we0,ae1,we1\n");
-            }
-        }
-        else 
-        {
-            u8x8.println("sdcard - err");
-            return;
-        }
-    #endif
-
-    #ifndef OFFLINE_MODE
-        // LMIC init
-        os_init();
-        LMIC_reset();
-    #endif
-
-    delay(5000);
-    u8x8.clear();
-
-    os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(1), measureAndSend);
 }
 
-void loop() 
+bool initDataLoggerWrite() 
 {
-    // Let LMIC handle background tasks
-    os_runloop_once();
+    Serial.println("(I) - init data-logger");
+    if (dataLogger.init()) 
+    {
+        u8x8.println("logger - ok");
+        if (!dataLogger.existsFile()) 
+        {
+            Serial.println("(I) - write csv-header");
+            dataLogger.appendFile("date,time,latitude,longitude,temperature,humidity,pressure,ae0,we0,ae1,we1\n");
+        }
+
+        return true;
+    }
+    else 
+    {
+        u8x8.println("logger - err");
+        return false;
+    }
+}
+
+void initDataLoggerRead() 
+{
+    Serial.println("(I) - init data-logger");
+    if (dataLogger.init()) 
+    {
+        u8x8.println("logger - ok");
+        dataLogger.readFile();
+    }
+    else 
+    {
+        u8x8.println("logger - err");
+    }
+}
+
+void initButton() 
+{
+    Serial.println("(I) - init button");
+    pinMode(buttonPin, INPUT);
+    u8x8.println("button - ok");
+}
+
+void initLed() 
+{
+    Serial.println("(I) - init led");
+    pinMode(ledPin, OUTPUT);
+    u8x8.println("led - ok");
+}
+
+void initQueue()
+{
+    Serial.println("(I) - init queue");
+    xQueue = xQueueCreate(1000, sizeof(EnvironmentData));
+    u8x8.println("queue - ok");
+}
+
+void initLmic()
+{
+    Serial.println("(I) - init lmic");
+    os_init();
+    LMIC_reset();
+    u8x8.println("lmic - ok");
 }
 
 void measureAndSend(osjob_t* j) 
@@ -231,13 +310,13 @@ void send()
     {
         lastSending = millis();
 
-        #ifdef OFFLINE_MODE
+        #ifdef OFFLINE_WRITE_MODE
             Serial.println("(S) ================================");
-            Serial.println("(S) - start sd-card writing");
+            Serial.println("(S) - start data logging");
 
-            // append data to file on sd-card
+            // append data to file
             char message[200];
-            currentData.sdcard_message(message);
+            currentData.logger_message(message);
             u8x8.clearLine(7);
             u8x8.setCursor(0, 7);
             bool success = dataLogger.appendFile(message);
@@ -249,11 +328,12 @@ void send()
             {
                 u8x8.printf("append - err");
             }
+            dataLogger.printInfo();
             delay(2000);
             messageSent(success);
         #endif
 
-        #ifndef OFFLINE_MODE
+        #ifndef OFFLINE_WRITE_MODE
             Serial.println("(S) ================================");
             Serial.println("(S) - start sending");
 
@@ -329,7 +409,7 @@ void onEvent (ev_t ev)
             Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
             if (LMIC.txrxFlags & TXRX_ACK) 
             {
-                Serial.println(F("Received ack"));
+                Serial.println(F("(S) - received ack"));
                 messageSent(true);
             }
             else 

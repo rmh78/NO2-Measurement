@@ -82,7 +82,7 @@ void EnvironmentData::lora_message(char* outStr)
     );
 }
 
-void EnvironmentData::sdcard_message(char* outStr) 
+void EnvironmentData::logger_message(char* outStr) 
 {
     sprintf(outStr, "%4d-%02d-%02d,%02d:%02d:%02d,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
         gps_year,
@@ -106,22 +106,22 @@ void EnvironmentData::sdcard_message(char* outStr)
 void NO2Measurement::init() 
 {
     // hardware serial for  GPS
-    Serial.println("-- init GPS");
+    Serial.println("(I) - init GPS");
     Serial1.begin(9600, SERIAL_8N1, 17, 16);
 
     // init SHT31
-    Serial.println("-- init SHT31");
+    Serial.println("(I) - init SHT31");
     sht31.begin(0x44);
     sht31.heater(true);
     delay(2000);
     sht31.heater(false);
 
     // init BMP180
-    Serial.println("-- init BMP180");
+    Serial.println("(I) - init BMP180");
     bmp.begin();
 
     // init ADS1115
-    Serial.println("-- init ADS1115");
+    Serial.println("(I) - init ADS1115");
     ads[0].setGain(GAIN_FOUR);
     ads[0].begin();
     ads[1].setGain(GAIN_FOUR);

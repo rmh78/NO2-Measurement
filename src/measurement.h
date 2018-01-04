@@ -35,7 +35,7 @@ public:
     float     no2_ppb[2];
 
     void lora_message(char* outStr);
-    void sdcard_message(char* outStr);
+    void logger_message(char* outStr);
 };
 
 /* 
