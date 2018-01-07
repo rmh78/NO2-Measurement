@@ -48,14 +48,16 @@ The power consumption is high (==TODO==) because the NO2 sensor has an integrate
 # Tasks
 - [x] build software for offline mode (SD-card instead of LoRaWan)
 - [x] hardware/software 2 day testrun (stability, power consumption) --> 01.01.2018 - 02.01.2018
-- [ ] calibration run next to the official station "Landshuter Allee" --> 02.01.2018 14:00 - 
+- [x] first calibration run --> 02.01.2018 14:00 - 04.01.2018 - 09:00 --> failed with no data
+- [x] second calibration run --> 05.01.2018 12:00 - 07.01.2018 - 15:00 --> after one day no more no2 values
+- [ ] third calibration run
 - [ ] define linear function with multiple linear regression
 - [ ] modify nodred flow to use linear function to calculate NO2
 - [ ] display worldmap on the nodered dashboard using geoJSON (https://github.com/dceejay/RedMap)
 - [x] add images to the readme page
 - [ ] try Grafana for charts (https://grafana.com/grafana)
 
-# Conflicts / Issues / Findings
+# Historical conflicts, issues and findings
 * LMIC does not work in with RTOS (https://www.freertos.org) Tasks because of timing issues. There is no current version of the LMIC library for the ESP32. Because of this issue I decided to do not use tasks for measurement and sending.
 * LMIC does not work in combination with the SD card reader. I think it's because they are both on the SPI bus. Because of this issue the SD card is only used in the offline mode (used for calibration only).
 * SD card reader does not work very stable. First it does not work with 3.3V as described in the spec. Second it needs exact 5V, so I had to add an additional step-up-converter to power it. My first calibration-run ended with no data on the sd-card. I decided to switch to the internal flash-memory of the ESP32 using SPIFFS (the interface is nearly the same).

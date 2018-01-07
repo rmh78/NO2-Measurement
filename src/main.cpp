@@ -30,7 +30,7 @@
 /* OFFLINE_WRITE_MODE writes a file to the flash-memory instead 
  * of sending it via lorawan
  */
-#define OFFLINE_WRITE_MODE
+//#define OFFLINE_WRITE_MODE
 
 /* OFFLINE_READ_MODE read the content of the file on the flash-memory 
  * and displays it on the serial monitor
@@ -198,6 +198,7 @@ void initDataLoggerRead()
     {
         u8x8.println("logger - ok");
         dataLogger.readFile();
+        //dataLogger.deleteFile();
     }
     else 
     {
