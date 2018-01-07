@@ -49,10 +49,10 @@ The power consumption is high (==TODO==) because the NO2 sensor has an integrate
 - [x] build software for offline mode (SD-card instead of LoRaWan)
 - [x] hardware/software 2 day testrun (stability, power consumption) --> 01.01.2018 - 02.01.2018
 - [x] first calibration run --> 02.01.2018 14:00 - 04.01.2018 - 09:00 --> failed with no data
-- [x] second calibration run --> 05.01.2018 12:00 - 07.01.2018 - 15:00 --> after one day no more no2 values
-- [ ] third calibration run
-- [ ] define linear function with multiple linear regression
-- [ ] modify nodred flow to use linear function to calculate NO2
+- [x] second calibration run --> 05.01.2018 12:00 - 07.01.2018 - 15:00 --> after one day no more no2 values (problems with the power supply)
+- [ ] third calibration run (to gather data over a wider time-range)
+- [x] define linear function with multiple linear regression
+- [x] modify nodred flow to use linear function to calculate NO2
 - [ ] display worldmap on the nodered dashboard using geoJSON (https://github.com/dceejay/RedMap)
 - [x] add images to the readme page
 - [ ] try Grafana for charts (https://grafana.com/grafana)
