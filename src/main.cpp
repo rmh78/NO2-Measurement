@@ -9,7 +9,6 @@
  * - TOGGLE_MODE - only measurement unless the button is pressed which causes sending all stored messages
  */
 
-#include <Arduino.h>
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
