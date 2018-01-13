@@ -6,6 +6,7 @@
 #include <Adafruit_ADS1015.h>
 
 #include <TinyGPS++.h> 
+#include <Wire.h>
 
 // Temperatur and Humidity sensor
 Adafruit_SHT31 sht31 = Adafruit_SHT31();
@@ -137,7 +138,16 @@ void NO2Measurement::measure(EnvironmentData *data)
 
 void NO2Measurement::readSHT31(EnvironmentData *data) 
 {
+    uint16_t status = sht31.readStatus();
+
     float t = sht31.readTemperature();
+    if (isnan(t)) 
+    {
+        Serial.println("***** I2C error ******");
+        Wire.reset();
+        //sht31.reset();
+        t = sht31.readTemperature();
+    }
     float h = sht31.readHumidity();
 
     data->sht31_temperature = t;

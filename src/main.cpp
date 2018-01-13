@@ -13,6 +13,7 @@
 #include <hal/hal.h>
 #include <SPI.h>
 #include <U8x8lib.h>
+#include <Wire.h>
 
 #include "measurement.h"
 #include "datalogger.h"
@@ -29,7 +30,7 @@
 /* OFFLINE_WRITE_MODE writes a file to the flash-memory instead 
  * of sending it via lorawan
  */
-//#define OFFLINE_WRITE_MODE
+#define OFFLINE_WRITE_MODE
 
 /* OFFLINE_READ_MODE read the content of the file on the flash-memory 
  * and displays it on the serial monitor
@@ -109,7 +110,9 @@ void displayQueue();
 
 void setup() {
     Serial.begin(115200);
+    Wire.begin();
     delay(1000);
+
     Serial.println(F("(I) ================================"));
     Serial.println(F("(I) - init started"));
 
