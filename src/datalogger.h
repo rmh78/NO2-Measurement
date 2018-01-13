@@ -1,3 +1,10 @@
+/*
+ * ----------------------------------------------------------------------------
+ * NO2 measurement with ESP32 and LoRaWan
+ * https://github.com/rmh78/NO2-Measurement
+ * ----------------------------------------------------------------------------
+ */
+
 #ifndef _datalogger_h_
 #define _datalogger_h_
 

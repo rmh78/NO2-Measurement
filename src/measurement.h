@@ -1,3 +1,11 @@
+/*
+ * ----------------------------------------------------------------------------
+ * NO2 measurement with ESP32 and LoRaWan
+ * https://github.com/rmh78/NO2-Measurement
+ * ----------------------------------------------------------------------------
+ */
+
+
 #ifndef _measurement_h_
 #define _measurement_h_
 

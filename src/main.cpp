@@ -1,4 +1,9 @@
 /*
+ * ----------------------------------------------------------------------------
+ * NO2 measurement with ESP32 and LoRaWan
+ * https://github.com/rmh78/NO2-Measurement
+ * ----------------------------------------------------------------------------
+ *
  * This program reads the measured data of all sensors needed for NO2 calculation.
  * The data is sent with LoRaWAN to the TheThingsNetwork.
  * 
