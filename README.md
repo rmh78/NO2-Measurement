@@ -34,6 +34,8 @@ The NO2 measurement station uses two NO2 sensors, a temperature and humidity sen
   * node-red-node-mysql (inserting and reading the data from the MySQL database)
   * node-red-contrib-web-worldmap (open-street-map pluging)
 
+![NodeRed Flow 1](images/no2-nodered-flow1.png)
+![NodeRed Flow 2](images/no2-nodered-flow2.png)
 ![Image of NO2 dashboard](images/no2-nodered-dashboard.png)
 
 # Calibration of the NO2 sensor
@@ -46,16 +48,22 @@ The NO2 sensors are pre-calibrated and are shipped with a formular to calculate 
 The power consumption is high (==TODO==) because the NO2 sensor has an integrated heating.
 
 # Tasks
-- [x] build software for offline mode (SD-card instead of LoRaWan)
-- [x] hardware/software 2 day testrun (stability, power consumption) --> 01.01.2018 - 02.01.2018
-- [x] first calibration run --> 02.01.2018 14:00 - 04.01.2018 - 09:00 --> failed with no data
-- [x] second calibration run --> 05.01.2018 12:00 - 07.01.2018 - 15:00 --> after one day no more no2 values (problems with the power supply)
-- [ ] third calibration run (to gather data over a wider time-range)
-- [x] define linear function with multiple linear regression
-- [x] modify nodred flow to use linear function to calculate NO2
-- [ ] display worldmap on the nodered dashboard using geoJSON (https://github.com/dceejay/RedMap)
-- [x] add images to the readme page
-- [ ] try Grafana for charts (https://grafana.com/grafana)
+- Software
+  - [x] build software for offline mode (SD-card instead of LoRaWan)
+  - [x] add images to the readme page
+- Testrun (hardware & software)
+  - [x] 2 day testrun - proof of stability and power consumption --> 01.01.2018 - 02.01.2018
+  - [ ] 5 day testrun - proof of stability --> 12.02.2018 - ???
+- Calibration
+  - [x] 1. calibration run --> 02.01.2018 14:00 - 04.01.2018 - 09:00 --> failed with no data :-(
+  - [x] 2. calibration run --> 05.01.2018 12:00 - 07.01.2018 - 15:00 --> after one day no more no2 values (problems with the power supply) :-(
+  - [ ] 3. calibration run (to gather data over a wider time-range)
+- Regression
+  - [x] define linear function with multiple linear regression
+  - [x] modify nodred flow to use linear function to calculate NO2
+- NodeRed
+  - [ ] display worldmap on the nodered dashboard using geoJSON (https://github.com/dceejay/RedMap)
+  - [ ] try Grafana for charts (https://grafana.com/grafana)
 
 # Historical conflicts, issues and findings
 * LMIC does not work in with RTOS (https://www.freertos.org) Tasks because of timing issues. There is no current version of the LMIC library for the ESP32. Because of this issue I decided to do not use tasks for measurement and sending.
