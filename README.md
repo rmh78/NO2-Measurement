@@ -1,5 +1,5 @@
 # Introduction
-In this project I built a NO2 measurement station which sends its data via LoRaWan to TheThingsNetwork. A backend nodered server receives the messages and stores them into a MySQL database and then displays all on a dashboard. This project is inspired by the Urban AirQ (http://waag.org/en/project/urban-airq) of the waag society (Results are published here: https://www.atmos-meas-tech-discuss.net/amt-2017-43/). My intention to start this project was to show the amount of NO2 pollution at my home compared to the official measurement station "Landshuter Allee" of my hometown which is one kilometer away.
+In this project I built a NO2 measurement station :mask: which sends its data via LoRaWan to TheThingsNetwork. A backend nodered server receives the messages and stores them into a MySQL database and then displays all on a dashboard. This project is inspired by the Urban AirQ (http://waag.org/en/project/urban-airq) of the waag society (Results are published here: https://www.atmos-meas-tech-discuss.net/amt-2017-43/). My intention to start this project was to show the amount of NO2 pollution at my home compared to the official measurement station "Landshuter Allee" of my hometown which is one kilometer away.
 
 The NO2 measurement station uses two NO2 sensors, a temperature and humidity sensor, an air-pressure sensor and a GPS module. The sensors are connected with the ESP32 microcontroller which has an OLED display and a LoRa module onboard. All the hardware is powered with a powerbank.
 
@@ -48,20 +48,20 @@ The NO2 sensors are pre-calibrated and are shipped with a formular to calculate 
 The power consumption is high (==TODO==) because the NO2 sensor has an integrated heating.
 
 # Tasks
-- Software
+- Software :computer:
   - [x] build software for offline mode (SD-card instead of LoRaWan)
   - [x] add images to the readme page
-- Testrun (hardware & software)
+- Testrun (hardware & software) :balloon:
   - [x] 2 day testrun - proof of stability and power consumption --> 01.01.2018 - 02.01.2018
   - [ ] 5 day testrun - proof of stability --> 12.02.2018 - ???
-- Calibration
-  - [x] 1. calibration run --> 02.01.2018 14:00 - 04.01.2018 - 09:00 --> failed with no data :-(
-  - [x] 2. calibration run --> 05.01.2018 12:00 - 07.01.2018 - 15:00 --> after one day no more no2 values (problems with the power supply) :-(
+- Calibration :red_car:
+  - [x] 1. calibration run --> 02.01.2018 14:00 - 04.01.2018 - 09:00 --> failed with no data :cry:
+  - [x] 2. calibration run --> 05.01.2018 12:00 - 07.01.2018 - 15:00 --> after one day no more no2 values (problems with the power supply) :cry:
   - [ ] 3. calibration run (to gather data over a wider time-range)
-- Regression
+- Regression :triangular_ruler:
   - [x] define linear function with multiple linear regression
   - [x] modify nodred flow to use linear function to calculate NO2
-- NodeRed
+- NodeRed :chart_with_upwards_trend:
   - [ ] display worldmap on the nodered dashboard using geoJSON (https://github.com/dceejay/RedMap)
   - [ ] try Grafana for charts (https://grafana.com/grafana)
 
