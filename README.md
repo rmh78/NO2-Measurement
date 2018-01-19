@@ -44,19 +44,19 @@ The NO2 sensors are pre-calibrated and are shipped with a formular to calculate 
 ![Image of NO2 calibration - sensor on the parking car](images/no2-calibration-1.jpg)
 ![Image of NO2 calibration - official station](images/no2-calibration-2.jpg)
 
-# Power consumption
-The power consumption is high (==TODO==) because the NO2 sensor has an integrated heating.
+# Power consumption :battery:
+The power consumption is high because the NO2 sensor has an integrated heating that needs to be powered all the time. The sensors, the GPS and the LoRaWan sender drains round about 100mA. That's sad because the device is not a low power device any more. For calibration runs I spent a big powerbank with 20.000 mAh to supply the hardware for some days.
 
 # Tasks
 - Software :computer:
   - [x] build software for offline mode (SD-card instead of LoRaWan)
   - [x] add images to the readme page
 - Testrun (hardware & software) :balloon:
-  - [x] 2 day testrun - proof of stability and power consumption --> 01.01.2018 - 02.01.2018
-  - [ ] 5 day testrun - proof of stability --> 12.02.2018 - ???
+  - [x] 2 day testrun - proof of stability and power consumption --> 01.01.2018 - 02.01.2018 --> successful
+  - [x] 7 day testrun - proof of stability --> 13.01.2018 - 19.01.2018 --> successful
 - Calibration :red_car:
   - [x] 1. calibration run --> 02.01.2018 14:00 - 04.01.2018 - 09:00 --> failed with no data :cry:
-  - [x] 2. calibration run --> 05.01.2018 12:00 - 07.01.2018 - 15:00 --> after one day no more no2 values (problems with the power supply) :cry:
+  - [x] 2. calibration run --> 05.01.2018 12:00 - 07.01.2018 - 15:00 --> after one day no more no2 values (stability-problems with I2C bus)
   - [ ] 3. calibration run (to gather data over a wider time-range)
 - Regression :triangular_ruler:
   - [x] define linear function with multiple linear regression
@@ -66,7 +66,7 @@ The power consumption is high (==TODO==) because the NO2 sensor has an integrate
   - [ ] try Grafana for charts (https://grafana.com/grafana)
 
 # Historical conflicts, issues and findings
-* LMIC does not work in with RTOS (https://www.freertos.org) Tasks because of timing issues. There is no current version of the LMIC library for the ESP32. Because of this issue I decided to do not use tasks for measurement and sending.
+* LMIC does not work in with RTOS (https://www.freertos.org) Tasks because of timing issues. There is no current version of the LMIC library for the ESP32. Because of this issue I decided to not use tasks for measurement and sending.
 * LMIC does not work in combination with the SD card reader. I think it's because they are both on the SPI bus. Because of this issue the SD card is only used in the offline mode (used for calibration only).
 * SD card reader does not work very stable. First it does not work with 3.3V as described in the spec. Second it needs exact 5V, so I had to add an additional step-up-converter to power it. My first calibration-run ended with no data on the sd-card. I decided to switch to the internal flash-memory of the ESP32 using SPIFFS (the interface is nearly the same).
-* After some hours running my sensor I'm facing I2C stability problems ([E][esp32-hal-i2c.c:161] i2cWrite(): Busy Timeout!). This is a known issue (https://github.com/espressif/arduino-esp32/issues/834). Trying to use reset wire if temperature measurement results in "not a number".
+* After some hours running my sensor I'm facing I2C stability problems ([E][esp32-hal-i2c.c:161] i2cWrite(): Busy Timeout!). This is a known issue (https://github.com/espressif/arduino-esp32/issues/834). Trying to reset the I2C wire if temperature measurement results in "not a number".

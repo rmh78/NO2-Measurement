@@ -2,3 +2,4 @@
 .piolibdeps
 .vscode/c_cpp_properties.json
 src/lorawan-node.h
+.vscode/launch.json
