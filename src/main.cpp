@@ -35,12 +35,12 @@
 /* OFFLINE_WRITE_MODE writes a file to the flash-memory instead 
  * of sending it via lorawan
  */
-#define OFFLINE_WRITE_MODE
+//#define OFFLINE_WRITE_MODE
 
 /* OFFLINE_READ_MODE read the content of the file on the flash-memory 
  * and displays it on the serial monitor
  */
-//#define OFFLINE_READ_MODE
+#define OFFLINE_READ_MODE
 
 /* LMIC callback methods to get the ids. 
  * The APPEUI, DEVEUI and APPKEY are defined in the file lorawan-node.h
@@ -186,7 +186,7 @@ bool initDataLoggerWrite()
         if (!dataLogger.existsFile()) 
         {
             Serial.println("(I) - write csv-header");
-            dataLogger.appendFile("date,time,latitude,longitude,temperature,humidity,pressure,ae0,we0,ae1,we1\n");
+            dataLogger.appendFile("date,time,latitude,longitude,temperature,humidity,pressure,ae,we,ppb\n");
         }
 
         return true;
@@ -496,10 +496,7 @@ void displayData(EnvironmentData *data)
     // NO2
     u8x8.clearLine(4);
     u8x8.setCursor(0, 4);
-    u8x8.printf("NO2 %.0f/%.0f/%.0f", data->no2_ae[0], data->no2_we[0], data->no2_ppb[0]);
-    u8x8.clearLine(5);
-    u8x8.setCursor(0, 5);
-    u8x8.printf("NO2 %.0f/%.0f/%.0f", data->no2_ae[1], data->no2_we[1], data->no2_ppb[1]);
+    u8x8.printf("NO2 %.0f/%.0f/%.0f", data->no2_ae, data->no2_we, data->no2_ppb);
 }
 
 void displayQueue() 

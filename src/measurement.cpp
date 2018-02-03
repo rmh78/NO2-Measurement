@@ -7,6 +7,7 @@
 
 #include "measurement.h"
 
+#include <TimeLib.h>
 #include <Adafruit_SHT31.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP085_U.h>
@@ -15,6 +16,10 @@
 #include <TinyGPS++.h> 
 #include <Wire.h>
 
+// Offset hours from gps time (UTC)
+const int UTC_offset = 1;   // Central European Time
+time_t prevDisplay = 0; // when the digital clock was displayed
+
 // Temperatur and Humidity sensor
 Adafruit_SHT31 sht31 = Adafruit_SHT31();
 
@@ -22,18 +27,10 @@ Adafruit_SHT31 sht31 = Adafruit_SHT31();
 Adafruit_BMP085_Unified bmp = Adafruit_BMP085_Unified(10085);
 
 // analog digital converter
-Adafruit_ADS1115 ads[2] = 
-    {
-        Adafruit_ADS1115(),
-        Adafruit_ADS1115(0x49)
-    };
+Adafruit_ADS1115 ads = Adafruit_ADS1115();
 
 // NO2 sensor constants
-NO2Sensor sensors[2] = 
-    { 
-        NO2Sensor(202310057, 231, 225, 238, 234, 0.258), 
-        NO2Sensor(202310055, 238, 233, 235, 220, 0.280) 
-    };
+NO2Sensor sensors = NO2Sensor(202310057, 231, 225, 238, 234, 0.258);
 
 NO2Sensor::NO2Sensor(uint32_t _serial_no, uint8_t _we_zero_electronic, uint8_t _we_zero_total, uint8_t _ae_zero_electronic, uint8_t _ae_zero_total, float _sensitivity)
 {
@@ -61,8 +58,6 @@ void EnvironmentData::lora_message(char* outStr)
         * 115319
         * 2401
         * 2406
-        * 2370
-        * 2375
         */
 
     uint16_t year = gps_year;
@@ -71,7 +66,7 @@ void EnvironmentData::lora_message(char* outStr)
         year = year - 2000;
     }
 
-    sprintf(outStr, "%+03.0f%02.0f%04.0f%02d%02d%02d%02d%02d%02d%06.0f%06.0f%04.0f%04.0f%04.0f%04.0f",
+    sprintf(outStr, "%+03.0f%02.0f%04.0f%02d%02d%02d%02d%02d%02d%06.0f%06.0f%04.0f%04.0f%03f.0",
         sht31_temperature,
         sht31_humidity,
         bmp180_pressure,
@@ -83,16 +78,15 @@ void EnvironmentData::lora_message(char* outStr)
         gps_second,
         gps_latitude * 10000,
         gps_longitude * 10000,
-        no2_ae[0] * 10,
-        no2_we[0] * 10,
-        no2_ae[1] * 10,
-        no2_we[1] * 10
+        no2_ae * 10,
+        no2_we * 10,
+        no2_ppb
     );
 }
 
 void EnvironmentData::logger_message(char* outStr) 
 {
-    sprintf(outStr, "%4d-%02d-%02d,%02d:%02d:%02d,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
+    sprintf(outStr, "%4d-%02d-%02d,%02d:%02d:%02d,%f,%f,%f,%f,%f,%f,%f,%f\n",
         gps_year,
         gps_month,
         gps_day,
@@ -104,10 +98,9 @@ void EnvironmentData::logger_message(char* outStr)
         sht31_temperature,
         sht31_humidity,
         bmp180_pressure,
-        no2_ae[0],
-        no2_we[0],
-        no2_ae[1],
-        no2_we[1]
+        no2_ae,
+        no2_we,
+        no2_ppb
     );
 }
 
@@ -130,10 +123,8 @@ void NO2Measurement::init()
 
     // init ADS1115
     Serial.println("(I) - init ADS1115");
-    ads[0].setGain(GAIN_FOUR);
-    ads[0].begin();
-    ads[1].setGain(GAIN_FOUR);
-    ads[1].begin();
+    ads.setGain(GAIN_FOUR);
+    ads.begin();
 }
 
 void NO2Measurement::measure(EnvironmentData *data)
@@ -191,56 +182,53 @@ void NO2Measurement::readBMP085(EnvironmentData *data)
 
 void NO2Measurement::readNO2(EnvironmentData *data) 
 {
-    for(int i = 0; i < 2; i++) 
+    // read NO2
+    int readingsCount = 30;
+    int readingsDelay = 1000;
+    float ads_multiplier = 0.03125F;
+    uint32_t acc_op1 = 0; // accumulator 1 value
+    uint32_t acc_op2 = 0; // accumulator 2 value
+
+    for (int j = 0; j < readingsCount; j++)
     {
-        // read NO2
-        int readingsCount = 30;
-        int readingsDelay = 1000;
-        float ads_multiplier = 0.03125F;
-        uint32_t acc_op1 = 0; // accumulator 1 value
-        uint32_t acc_op2 = 0; // accumulator 2 value
+        int16_t op1 = ads.readADC_Differential_0_1();    // Read ADC ports 0 and 1    
+        int16_t op2 = ads.readADC_Differential_2_3();    // Read ADC ports 2 and 3
 
-        for (int j = 0; j < readingsCount; j++)
+        acc_op1 += op1;
+        acc_op2 += op2;
+
+        delay(readingsDelay);
+    }
+
+    // averaged values for WE and Aux
+    float op1 = (acc_op1 / readingsCount);
+    float op2 = (acc_op2 / readingsCount);
+    float we = op1 * ads_multiplier;
+    float ae = op2 * ads_multiplier;
+
+    // skip values greater than 999 because they do not fit into the lora-message
+    if (we < 0 || we > 999 || ae < 0 || ae > 999) 
+    {
+        data->no2_we = 0;
+        data->no2_ae = 0;
+        data->no2_ppb = 0;
+
+        if (loggingEnabled) 
         {
-            int16_t op1 = ads[i].readADC_Differential_0_1();    // Read ADC ports 0 and 1    
-            int16_t op2 = ads[i].readADC_Differential_2_3();    // Read ADC ports 2 and 3
-
-            acc_op1 += op1;
-            acc_op2 += op2;
-
-            delay(readingsDelay);
+            Serial.printf("(M) - SKIP NO2 - we: %f, ae: %f\n", ae, we);
         }
+    }
+    else 
+    {
+        // simple ppb calculation (see alphasense datasheet)
+        float ppb = no2_algorithm_simple(sensors, we, ae);
+        data->no2_we = we;
+        data->no2_ae = ae;
+        data->no2_ppb = ppb;
 
-        // averaged values for WE and Aux
-        float op1 = (acc_op1 / readingsCount);
-        float op2 = (acc_op2 / readingsCount);
-        float we = op1 * ads_multiplier;
-        float ae = op2 * ads_multiplier;
-
-        // skip values greater than 999 because they do not fit into the lora-message
-        if (we < 0 || we > 999 || ae < 0 || ae > 999) 
+        if (loggingEnabled) 
         {
-            data->no2_we[i] = 0;
-            data->no2_ae[i] = 0;
-            data->no2_ppb[i] = 0;
-
-            if (loggingEnabled) 
-            {
-                Serial.printf("(M) - SKIP NO2 (Sensor %d) - we: %f, ae: %f\n", i, ae, we);
-            }
-        }
-        else 
-        {
-            // simple ppb calculation (see alphasense datasheet)
-            float ppb = no2_algorithm_simple(sensors[i], we, ae);
-            data->no2_we[i] = we;
-            data->no2_ae[i] = ae;
-            data->no2_ppb[i] = ppb;
-
-            if (loggingEnabled) 
-            {
-                Serial.printf("(M) - NO2 (Sensor %d) - we: %f, ae: %f, ppb: %f\n", i, ae, we, ppb);
-            }
+            Serial.printf("(M) - NO2 - we: %f, ae: %f, ppb: %f\n", ae, we, ppb);
         }
     }
 }
@@ -283,60 +271,73 @@ float NO2Measurement::no2_algorithm_simple(NO2Sensor sensor, float we, float ae)
 
 void NO2Measurement::readGPS(EnvironmentData *data) 
 {
-  while (Serial1.available() > 0) 
-  {
-    if (gps.encode(Serial1.read())) 
+    while (Serial1.available() > 0) 
     {
-      if (gps.date.isValid())
-      {
-        data->gps_year = gps.date.year();
-        data->gps_month = gps.date.month();
-        data->gps_day = gps.date.day();
-      }
+        if (gps.encode(Serial1.read())) 
+        {
+            if (gps.date.isValid() && gps.time.isValid())
+            {
+                int Year = gps.date.year();
+                byte Month = gps.date.month();
+                byte Day = gps.date.day();
+                byte Hour = gps.time.hour();
+                byte Minute = gps.time.minute();
+                byte Second = gps.time.second();
 
-      if (gps.time.isValid())
-      {
-        data->gps_hour = gps.time.hour();
-        data->gps_minute = gps.time.minute();
-        data->gps_second = gps.time.second();
-      }
+                // Set Time from GPS data string
+                setTime(Hour, Minute, Second, Day, Month, Year);
+                // Calc current Time Zone time by offset value
+                adjustTime(UTC_offset * SECS_PER_HOUR); 
 
-      if (gps.location.isValid()) 
-      {
-        data->gps_latitude = gps.location.lat();
-        data->gps_longitude = gps.location.lng();
-      }
+                if (timeStatus()!= timeNotSet) 
+                {
+                    if (now() != prevDisplay) 
+                    {
+                        prevDisplay = now();
+                        data->gps_year = year();
+                        data->gps_month = month();
+                        data->gps_day = day();
+                        data->gps_hour = hour();
+                        data->gps_minute = minute();
+                        data->gps_second = second();
+                    }
+                }
+            }
 
-      if (gps.altitude.isValid()) 
-      {
-        data->gps_altitude = gps.altitude.meters();
-      }
+            if (gps.location.isValid()) 
+            {
+                data->gps_latitude = gps.location.lat();
+                data->gps_longitude = gps.location.lng();
+            }
 
-      if (gps.satellites.isValid())
-      {
-        data->gps_satellites = gps.satellites.value();
-      }
+            if (gps.altitude.isValid()) 
+            {
+                data->gps_altitude = gps.altitude.meters();
+            }
 
-      if(gps.course.isValid()) 
-      {
-        data->gps_course = gps.course.deg();
-      }
+            if (gps.satellites.isValid())
+            {
+                data->gps_satellites = gps.satellites.value();
+            }
 
-      if(gps.speed.isValid()) 
-      {
-        data->gps_speed = gps.speed.mph();
-      }
+            if(gps.course.isValid()) 
+            {
+                data->gps_course = gps.course.deg();
+            }
+
+            if(gps.speed.isValid()) 
+            {
+                data->gps_speed = gps.speed.mph();
+            }
+        }
     }
-  }
 
     if (loggingEnabled) 
     {
-        /*
         Serial.printf("(M) - GPS - date/time: %02d.%02d.%4d %02d:%02d:%02d\n", 
             data->gps_day, data->gps_month, data->gps_year,
             data->gps_hour, data->gps_minute, data->gps_second);
         Serial.printf("(M) - GPS - location: %f/%f\n", 
             data->gps_latitude, data->gps_longitude);
-        */
     }
 }

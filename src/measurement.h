@@ -38,9 +38,9 @@ public:
     uint32_t  gps_satellites = 0;
     double    gps_course = 0;
     double    gps_speed = 0;
-    float     no2_ae[2];
-    float     no2_we[2];
-    float     no2_ppb[2];
+    float     no2_ae;
+    float     no2_we;
+    float     no2_ppb;
 
     void lora_message(char* outStr);
     void logger_message(char* outStr);
