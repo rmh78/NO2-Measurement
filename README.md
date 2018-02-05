@@ -5,8 +5,8 @@ The NO2 measurement station uses two NO2 sensors, a temperature and humidity sen
 
 # Hardware
 * 1x Heltec ESP32 with LoRa and OLED (http://www.heltec.cn)
-* 2x NO2 sensors from Alphasense (http://www.alphasense.com/index.php/products/nitrogen-dioxide-2)
-* 2x analog/digital converter ADS1115 from Adafruit
+* 1x NO2 sensors from Alphasense (http://www.alphasense.com/index.php/products/nitrogen-dioxide-2)
+* 1x analog/digital converter ADS1115 from Adafruit
 * 1x temperature and humidity sensor SHT31 from Adafruit
 * 1x air-pressure sensor BMP180 from Adafruit
 * 1x GPS module from Adafruit
@@ -57,7 +57,8 @@ The power consumption is high because the NO2 sensor has an integrated heating t
 - Calibration :red_car:
   - [x] 1. calibration run --> 02.01.2018 14:00 - 04.01.2018 - 09:00 --> failed with no data :cry:
   - [x] 2. calibration run --> 05.01.2018 12:00 - 07.01.2018 - 15:00 --> after one day no more no2 values (stability-problems with I2C bus)
-  - [ ] 3. calibration run (to gather data over a wider time-range)
+  - [x] 3. calibration run (to gather data over a wider time-range) --> 22.02.2018 - 28.02.2018 --> GPS did not work all the time, so the date/time was not persisted (recalculated manually)
+  - [ ] 4. calibration run (direct mount on the official station)
 - Regression :triangular_ruler:
   - [x] define linear function with multiple linear regression
   - [x] modify nodred flow to use linear function to calculate NO2
@@ -70,3 +71,5 @@ The power consumption is high because the NO2 sensor has an integrated heating t
 * LMIC does not work in combination with the SD card reader. I think it's because they are both on the SPI bus. Because of this issue the SD card is only used in the offline mode (used for calibration only).
 * SD card reader does not work very stable. First it does not work with 3.3V as described in the spec. Second it needs exact 5V, so I had to add an additional step-up-converter to power it. My first calibration-run ended with no data on the sd-card. I decided to switch to the internal flash-memory of the ESP32 using SPIFFS (the interface is nearly the same).
 * After some hours running my sensor I'm facing I2C stability problems ([E][esp32-hal-i2c.c:161] i2cWrite(): Busy Timeout!). This is a known issue (https://github.com/espressif/arduino-esp32/issues/834). Trying to reset the I2C wire if temperature measurement results in "not a number".
+* GPS UTC timing issue. Added UTC adjustment in code using the Time.h library.
+* One of my two NO2 sensors does not correlate as expected so I decided to reduce my measurement-station to host only one NO2 sensor. This sensor has now a better posision inside the casing to get more direct air.
