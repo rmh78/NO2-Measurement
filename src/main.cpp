@@ -40,7 +40,7 @@
 /* OFFLINE_READ_MODE read the content of the file on the flash-memory 
  * and displays it on the serial monitor
  */
-#define OFFLINE_READ_MODE
+//#define OFFLINE_READ_MODE
 
 /* LMIC callback methods to get the ids. 
  * The APPEUI, DEVEUI and APPKEY are defined in the file lorawan-node.h

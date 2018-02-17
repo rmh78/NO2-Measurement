@@ -57,8 +57,8 @@ The power consumption is high because the NO2 sensor has an integrated heating t
 - Calibration :red_car:
   - [x] 1. calibration run --> 02.01.2018 14:00 - 04.01.2018 - 09:00 --> failed with no data :cry:
   - [x] 2. calibration run --> 05.01.2018 12:00 - 07.01.2018 - 15:00 --> after one day no more no2 values (stability-problems with I2C bus)
-  - [x] 3. calibration run (to gather data over a wider time-range) --> 22.02.2018 - 28.02.2018 --> GPS did not work all the time, so the date/time was not persisted (recalculated manually)
-  - [ ] 4. calibration run (direct mount on the official station)
+  - [x] 3. calibration run (to gather data over a wider time-range) --> 22.01.2018 - 28.01.2018 --> GPS did not work all the time, so the date/time was not persisted (recalculated manually)
+  - [x] 4. calibration run (direct mount on the official station) --> 06.02.2018 - 13.02.2018 --> again date-time GPS problems I was able to reconstruct the date-time 
 - Regression :triangular_ruler:
   - [x] define linear function with multiple linear regression
   - [x] modify nodred flow to use linear function to calculate NO2
@@ -73,3 +73,4 @@ The power consumption is high because the NO2 sensor has an integrated heating t
 * After some hours running my sensor I'm facing I2C stability problems ([E][esp32-hal-i2c.c:161] i2cWrite(): Busy Timeout!). This is a known issue (https://github.com/espressif/arduino-esp32/issues/834). Trying to reset the I2C wire if temperature measurement results in "not a number".
 * GPS UTC timing issue. Added UTC adjustment in code using the Time.h library.
 * One of my two NO2 sensors does not correlate as expected so I decided to reduce my measurement-station to host only one NO2 sensor. This sensor has now a better posision inside the casing to get more direct air.
+* Prevent the transparent top of the casing with a cardboard to reduce the temperature influence of direct sun exposure.

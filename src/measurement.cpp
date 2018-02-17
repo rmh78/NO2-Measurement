@@ -66,7 +66,7 @@ void EnvironmentData::lora_message(char* outStr)
         year = year - 2000;
     }
 
-    sprintf(outStr, "%+03.0f%02.0f%04.0f%02d%02d%02d%02d%02d%02d%06.0f%06.0f%04.0f%04.0f%03f.0",
+    sprintf(outStr, "%+03.0f%02.0f%04.0f%02d%02d%02d%02d%02d%02d%06.0f%06.0f%06.0f%06.0f",
         sht31_temperature,
         sht31_humidity,
         bmp180_pressure,
@@ -78,9 +78,8 @@ void EnvironmentData::lora_message(char* outStr)
         gps_second,
         gps_latitude * 10000,
         gps_longitude * 10000,
-        no2_ae * 10,
-        no2_we * 10,
-        no2_ppb
+        no2_ae * 1000,
+        no2_we * 1000
     );
 }
 
