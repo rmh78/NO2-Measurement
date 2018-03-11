@@ -3,3 +3,4 @@
 .vscode/c_cpp_properties.json
 src/lorawan-node.h
 .vscode/launch.json
+.vscode/.browse.c_cpp.db*

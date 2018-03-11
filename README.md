@@ -38,6 +38,9 @@ The NO2 measurement station uses two NO2 sensors, a temperature and humidity sen
 ![NodeRed Flow 2](images/no2-nodered-flow2.png)
 ![Image of NO2 dashboard](images/no2-nodered-dashboard.png)
 
+# Live Dashboard
+http://h2708685.stratoserver.net:1880/ui/ 
+
 # Calibration of the NO2 sensor
 The NO2 sensors are pre-calibrated and are shipped with a formular to calculate the NO2 concentration in ppb with the measured output voltages of the sensor. Because the results are poor I decided to calibrate the sensors against the measurement data of the official measurement station (http://inters.bayern.de/luebmw/csv/blfu_1404_NO2.csv) of my hometown. I placed my hardware on the roof of my car and placed my car next to the offical station. So I was able to store the measured data of 2 days on the flash memory of the ESP32. With this data I used linear regression (calculate with LibreOffice LINEST function: https://help.libreoffice.org/Calc/Array_Functions#LINEST) to get a linear function which outputs the NO2 concentration in ug/m3 like the official station does. For the linear regression I used the output voltage of NO2 sensor, the temperture, the humidity and the pressure as input data to get the values of the official station.
 
